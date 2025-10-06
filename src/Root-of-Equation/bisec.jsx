@@ -97,7 +97,7 @@ function Bisec() {
           />
         </label>
         <label>
-          Tolerance (errorb):
+          Tolerance:
           <input
             type="number"
             value={errorb}

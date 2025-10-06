@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-//ค่าแปลก กราฟแปลก
+
 function OneP() {
-  const [funco, setFuncO] = useState("0.5 * (x + x / 7)");
+  const [funco, setFuncO] = useState("(x + 7 / x) * 0.5");
   const [xo0, setXO0] = useState(1);
   const [xo, setXO] = useState(null);
   const [erroro, setErrorO] = useState(0.000001);
@@ -20,34 +20,38 @@ function OneP() {
       return;
     }
 
-    let xO0 = xo0;
-    let xO = xO0;
+    let xO0 = parseFloat(xo0);
+    let xO;
     let errorVal = 1;
     let iter = 0;
-    let resultso = [];
-    let pointso = [];
+    const tol = parseFloat(erroro);
+    const resultso = [];
+    const pointso = [xO0];
 
-    while (errorVal > erroro) {
-      iter++;
+    while (errorVal >= tol && iter < 1000) {
       xO = f(xO0);
-      errorVal = Math.abs(xO - xO0);
+      errorVal = Math.abs((xO - xO0) / xO);
+      iter++;
+
       resultso.push({
         iter,
         xOld: xO0,
         xNew: xO,
         error: errorVal,
       });
+
       pointso.push(xO);
       xO0 = xO;
-
-      if (iter > 1000) break; 
     }
 
-    // Graph data
-    let xVals = [];
-    let yVals = [];
-    let step = (Math.max(...pointso) - Math.min(...pointso)) / 200 || 0.01;
-    for (let x = Math.min(...pointso) - 1; x <= Math.max(...pointso) + 1; x += step) {
+
+    const minX = Math.min(...pointso) - 1;
+    const maxX = Math.max(...pointso) + 1;
+    const step = (maxX - minX) / 200 || 0.01;
+    const xVals = [];
+    const yVals = [];
+
+    for (let x = minX; x <= maxX; x += step) {
       xVals.push(x);
       yVals.push(f(x));
     }
@@ -61,14 +65,15 @@ function OneP() {
 
   return (
     <>
-      <h1>One-Point Iteration Methods</h1>
+      <h1>One-Point Iteration Method</h1>
+
       <div className="input-section">
         <label>
           Function g(x):
           <input value={funco} onChange={(e) => setFuncO(e.target.value)} />
         </label>
         <label>
-          Initial x0:
+          Initial x₀:
           <input
             type="number"
             value={xo0}
@@ -97,11 +102,18 @@ function OneP() {
               name: "g(x)",
             },
             {
+              x: plotDataO.x,
+              y: plotDataO.x,
+              type: "scatter",
+              mode: "lines",
+              name: "y = x",
+              line: { dash: "dot", color: "gray" },
+            },
+            {
               x: xPointso,
               y: xPointso.map(() => 0),
               mode: "markers+lines",
               marker: { color: "red", size: 8 },
-              line: { dash: "dot", color: "red" },
               name: "x points",
             },
             {
@@ -113,7 +125,7 @@ function OneP() {
             },
           ]}
           layout={{
-            title: "One-Point Iteration - Graph of g(x)",
+            title: "Graph of g(x) and Iteration Points",
             xaxis: { title: "x" },
             yaxis: { title: "g(x)" },
           }}
@@ -139,7 +151,7 @@ function OneP() {
                   <td>{row.iter}</td>
                   <td>{row.xOld.toFixed(6)}</td>
                   <td>{row.xNew.toFixed(6)}</td>
-                  <td>{row.error.toFixed(6)}</td>
+                  <td>{row.error.toFixed(8)}</td>
                 </tr>
               ))}
             </tbody>
@@ -149,7 +161,7 @@ function OneP() {
 
       {xo != null && (
         <h2>
-          Final Root = {xo.toFixed(6)} (Iterations: {iterationO})
+          Final Root ≈ {xo.toFixed(6)} (Iterations: {iterationO})
         </h2>
       )}
     </>

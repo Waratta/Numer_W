@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-
+//ค่าไม่ขึ้น
 function Conju() {
   const [eps, setEps] = useState(1e-10);
   const [iterations, setIterations] = useState([]);

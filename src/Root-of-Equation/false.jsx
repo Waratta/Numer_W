@@ -98,7 +98,7 @@ function False() {
           />
         </label>
         <label>
-          Tolerance (errorF):
+          Tolerance:
           <input
             type="number"
             value={errorf}
