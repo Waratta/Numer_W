@@ -77,7 +77,7 @@ function Multi() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Multiple Linear Regression (3 Variables)</h1>
+      <h1>Multiple Linear Regression</h1>
       <button onClick={calculate}>Calculate</button>
 
       {coeff && (

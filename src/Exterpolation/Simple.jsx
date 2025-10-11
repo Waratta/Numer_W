@@ -1,4 +1,8 @@
+import { useState } from "react";
+
 function Simple(){
+ 
+
     return (
         <>
             <h1>Simple Regression</h1>

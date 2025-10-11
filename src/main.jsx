@@ -22,17 +22,14 @@ import Lu from './Linear-algebra/Matrix.jsx';
 import Jacobi from './Linear-algebra/Jacobi.jsx';
 import Conju from './Linear-algebra/Conju.jsx';
 
-
-
 import Interpolation from './Interpolation/Interpolation.jsx'
 import Lagrange from './Interpolation/Lagrange.jsx'
 import Newtondiff from './Interpolation/Newtondiff.jsx'
 import Spline from './Interpolation/Spline.jsx'
 
 import Exterpolation from './Exterpolation/Exterpolation.jsx';
-import Multi from './Exterpolation/Multi.jsx';
 import Simple from './Exterpolation/Simple.jsx';
-
+import Multi from './Exterpolation/Multi.jsx';
 
 
 
@@ -65,7 +62,8 @@ createRoot(document.getElementById('root')).render(
 
 
         <Route path="/Exterpolation/Exterpolation" element={<Exterpolation />} />
-
+        <Route path="/Exterpolation/Simple" element={<Simple />} />
+        <Route path="/Exterpolation/Multi" element={< Multi />} />
 
       </Routes>
     </BrowserRouter>

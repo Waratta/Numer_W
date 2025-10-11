@@ -2,7 +2,6 @@ function RootE (){
     return(
         <>
             <h1>Root Of Equation</h1>
-            <h2>Choose Again</h2>
             <ul 
                 style={{ listStyle: 'none', padding: 0 }}>
                 <li><a href="/Root-of-Equation/graph"> <h2>Graphical Methods</h2></a></li>

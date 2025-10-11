@@ -1,55 +1,55 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-//ค่าไม่ขึ้น
+
 function Conju() {
   const [eps, setEps] = useState(1e-10);
-  const [iterations, setIterations] = useState([]);
+  const [iterationsc, setIterations] = useState([]);
 
-  const calculate = () => {
+  const calculatec = () => {
     const A = [
       [5,2,0,0],
       [2,5,2,0],
       [0,2,5,2],
       [0,0,2,5],
     ];
-    const b = [12,17,14,7];
-    let x = [0,0,0,0];
-    let r = [...b];
-    let p = [...r];
-    let Ap = [0,0,0,0];
-    let iter = 0;
+    const bc = [12,17,14,7];
+    let xc = [0,0,0,0];
+    let rc = [...bc];
+    let pc = [...rc];
+    let Apc = [0,0,0,0];
+    let iterc = 0;
 
-    let rsold = r.reduce((sum, ri) => sum + ri*ri, 0);
-    const results = [];
+    let rsoldc = rc.reduce((sum, rci) => sum + rci*rci, 0);
+    const resultsc = [];
 
     for(let k=0;k<1000;k++){
       // Ap = A*p
       for(let i=0;i<4;i++){
-        Ap[i]=0;
+        Apc[i]=0;
         for(let j=0;j<4;j++){
-          Ap[i]+=A[i][j]*p[j];
+          Apc[i]+=A[i][j]*pc[j];
         }
       }
 
-      const dot1 = p.reduce((sum, pi, i) => sum + pi*Ap[i], 0);
-      const alpha = rsold / dot1;
+      const dot1 = pc.reduce((sum, pi, i) => sum + pi*Apc[i], 0);
+      const alpha = rsoldc / dot1;
 
-      for(let i=0;i<4;i++) x[i]+=alpha*p[i];
-      for(let i=0;i<4;i++) r[i]-=alpha*Ap[i];
+      for(let i=0;i<4;i++) xc[i]+=alpha*pc[i];
+      for(let i=0;i<4;i++) rc[i]-=alpha*Apc[i];
 
-      const rsnew = r.reduce((sum, ri) => sum + ri*ri, 0);
-      iter++;
+      const rsnew = rc.reduce((sum, ri) => sum + ri*ri, 0);
+      iterc++;
 
-      results.push({ iter, x: [...x], norm: Math.sqrt(rsnew) });
+      resultsc.push({ iterc, xc: [...x], norm: Math.sqrt(rsnew) });
 
       if(Math.sqrt(rsnew)<eps) break;
 
-      const beta = rsnew/rsold;
-      for(let i=0;i<4;i++) p[i]=r[i]+beta*p[i];
-      rsold=rsnew;
+      const beta = rsnew/rsoldc;
+      for(let i=0;i<4;i++) pc[i]=rc[i]+beta*pc[i];
+      rsoldc=rsnew;
     }
 
-    setIterations(results);
+    setIterations(resultsc);
   };
 
   return (
@@ -57,13 +57,13 @@ function Conju() {
       <h1>Conjugate Gradient Method</h1>
       <div style={{ marginBottom: "10px" }}>
         <label>
-          Tolerance (eps):
+          Tolerance:
           <input type="number" value={eps} onChange={(e)=>setEps(Number(e.target.value))} />
         </label>
-        <button onClick={calculate}>Calculate</button>
+        <button onClick={calculatec}>Calculate</button>
       </div>
 
-      {iterations.length > 0 && (
+      {iterationsc.length > 0 && (
         <>
           <h2>Iterations:</h2>
           <table border="1" cellPadding="5">
@@ -75,13 +75,13 @@ function Conju() {
               </tr>
             </thead>
             <tbody>
-              {iterations.map(row => (
-                <tr key={row.iter}>
-                  <td>{row.iter}</td>
-                  <td>{row.x[0].toFixed(6)}</td>
-                  <td>{row.x[1].toFixed(6)}</td>
-                  <td>{row.x[2].toFixed(6)}</td>
-                  <td>{row.x[3].toFixed(6)}</td>
+              {iterationsc.map(row => (
+                <tr key={row.iterc}>
+                  <td>{row.iterc}</td>
+                  <td>{row.xc[0].toFixed(6)}</td>
+                  <td>{row.xc[1].toFixed(6)}</td>
+                  <td>{row.xc[2].toFixed(6)}</td>
+                  <td>{row.xc[3].toFixed(6)}</td>
                   <td>{row.norm.toExponential(3)}</td>
                 </tr>
               ))}
@@ -92,23 +92,23 @@ function Conju() {
           <Plot
             data={[
               {
-                x: iterations.map(r=>r.iter),
-                y: iterations.map(r=>r.x[0]),
+                x: iterationsc.map(rc=>rc.iterc),
+                y: iterationsc.map(rc=>rc.xc[0]),
                 type:"scatter", mode:"lines+markers", name:"x1"
               },
               {
-                x: iterations.map(r=>r.iter),
-                y: iterations.map(r=>r.x[1]),
+                x: iterationsc.map(rc=>rc.iterc),
+                y: iterationsc.map(rc=>rc.xc[1]),
                 type:"scatter", mode:"lines+markers", name:"x2"
               },
               {
-                x: iterations.map(r=>r.iter),
-                y: iterations.map(r=>r.x[2]),
+                x: iterationsc.map(rc=>rc.iterc),
+                y: iterationsc.map(rc=>rc.xc[2]),
                 type:"scatter", mode:"lines+markers", name:"x3"
               },
               {
-                x: iterations.map(r=>r.iter),
-                y: iterations.map(r=>r.x[3]),
+                x: iterationsc.map(rc=>r.iterc),
+                y: iterationsc.map(rc=>rc.xc[3]),
                 type:"scatter", mode:"lines+markers", name:"x4"
               }
             ]}

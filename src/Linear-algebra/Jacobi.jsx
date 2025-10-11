@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-//ค่าไม่ขึ้น
 
 function Jacobi() {
   const [x1, setX1] = useState(0);

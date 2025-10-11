@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-//กราฟแปลก
+
 function newton() {
   const [func, setFunc] = useState("x - ((x*x)-7)/(2*x)"); 
   const [x0, setX0] = useState(2);
