@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Plot from "react-plotly.js";
 
 function Bisec() {
   const [funcB, setFuncB] = useState("x**4 - 13");
@@ -9,8 +8,6 @@ function Bisec() {
   const [tolB, setTolB] = useState([]);
   const [finalxm, setFinalXm] = useState(null);
   const [iteration, setIteration] = useState(0);
-  const [plotDataB, setPlotDataB] = useState({ x: [], y: [] });
-  const [xmPoints, setXmPoints] = useState([]);
 
   const calculateB = () => {
     let f;
@@ -56,7 +53,6 @@ function Bisec() {
       iter++;
     }
 
-   
     let xVals = [];
     let yVals = [];
     let step = (xrb - xlb) / 200; 
@@ -68,7 +64,6 @@ function Bisec() {
     setTolB(results);
     setFinalXm(xm);
     setIteration(iter);
-    setPlotDataB({ x: xVals, y: yVals });
     setXmPoints(xmList);
   };
 
@@ -106,41 +101,6 @@ function Bisec() {
         </label>
         <button onClick={calculateB}>Calculate</button>
       </div>
-
-      {plotDataB.x.length > 0 && (
-        <Plot
-          data={[
-            {
-              x: plotDataB.x,
-              y: plotDataB.y,
-              type: "scatter",
-              mode: "lines",
-              name: "f(x)",
-            },
-            {
-              x: xmPoints,
-              y: xmPoints.map(() => 0),
-              mode: "markers+lines",
-              marker: { color: "red", size: 8 },
-              line: { dash: "dot", color: "red" },
-              name: "xm (iterations)",
-            },
-            {
-              x: [finalxm],
-              y: [0],
-              mode: "markers",
-              marker: { color: "green", size: 12, symbol: "star" },
-              name: "Final Root",
-            },
-          ]}
-          layout={{
-            title: "Bisection Method - Graph of f(x)",
-            xaxis: { title: "x" },
-            yaxis: { title: "f(x)" },
-          }}
-          style={{ width: "100%", height: "500px" }}
-        />
-      )}
 
       {tolB.length > 0 && (
         <div className="tol-section">

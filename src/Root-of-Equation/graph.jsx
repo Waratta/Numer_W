@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Plot from "react-plotly.js";
-
+ 
 function Graph() {
   const [funcG, setFuncG] = useState("43*x - 180");
   const [XS, setXS] = useState(0);
