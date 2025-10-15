@@ -10,6 +10,8 @@ function App() {
         <li><a href="/Linear-algebra/linear"> <h2>Linear Algebra Equation</h2></a></li>
         <li><a href="/Interpolation/Interpolation"> <h2>Interpolation</h2></a></li>
         <li><a href="/Exterpolation/Exterpolation"> <h2>Extrapolation</h2></a></li>
+        <li><a href="/Integration/Integration"> <h2>Integration</h2></a></li>
+        <li><a href="/Differentiation/Differentiation"> <h2>Differentiation</h2></a></li>
       </ul>
     </>
   );

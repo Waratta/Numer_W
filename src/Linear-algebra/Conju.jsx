@@ -2,121 +2,241 @@ import { useState } from "react";
 import Plot from "react-plotly.js";
 
 function Conju() {
-  const [eps, setEps] = useState(1e-10);
-  const [iterationsc, setIterations] = useState([]);
+  const [n, setN] = useState(4);
+  const [A, setA] = useState(
+    Array(4).fill(0).map(() => Array(4).fill(0))
+  );
+  const [b, setB] = useState(Array(4).fill(0));
+  const [x0, setX0] = useState(Array(4).fill(0));
+  const [eps, setEps] = useState(0.000001);
+  const [iterations, setIterations] = useState([]);
 
-  const calculatec = () => {
-    const A = [
-      [5,2,0,0],
-      [2,5,2,0],
-      [0,2,5,2],
-      [0,0,2,5],
-    ];
-    const bc = [12,17,14,7];
-    let xc = [0,0,0,0];
-    let rc = [...bc];
-    let pc = [...rc];
-    let Apc = [0,0,0,0];
-    let iterc = 0;
+  const handleSizeChange = (size) => {
+    const newSize = parseInt(size);
+    setN(newSize);
+    setA(Array(newSize).fill(0).map(() => Array(newSize).fill(0)));
+    setB(Array(newSize).fill(0));
+    setX0(Array(newSize).fill(0));
+    setIterations([]);
+  };
 
-    let rsoldc = rc.reduce((sum, rci) => sum + rci*rci, 0);
-    const resultsc = [];
+  const handleAChange = (i, j, value) => {
+    const newA = [...A];
+    newA[i][j] = parseFloat(value) || 0;
+    setA(newA);
+  };
 
-    for(let k=0;k<1000;k++){
-      // Ap = A*p
-      for(let i=0;i<4;i++){
-        Apc[i]=0;
-        for(let j=0;j<4;j++){
-          Apc[i]+=A[i][j]*pc[j];
-        }
+  const handleBChange = (i, value) => {
+    const newB = [...b];
+    newB[i] = parseFloat(value) || 0;
+    setB(newB);
+  };
+
+  const handleX0Change = (i, value) => {
+    const newX0 = [...x0];
+    newX0[i] = parseFloat(value) || 0;
+    setX0(newX0);
+  };
+
+  const calculate = () => {
+    let x = [...x0];
+    let r = b.map((bi, i) => bi - A[i].reduce((sum, aij, j) => sum + aij * x[j], 0));
+    let p = [...r];
+    let Ap = Array(n).fill(0);
+    let rsold = r.reduce((sum, ri) => sum + ri * ri, 0);
+    let results = [];
+
+    for (let k = 0; k < 1000; k++) {
+   
+      for (let i = 0; i < n; i++) {
+        Ap[i] = 0;
+        for (let j = 0; j < n; j++) Ap[i] += A[i][j] * p[j];
       }
 
-      const dot1 = pc.reduce((sum, pi, i) => sum + pi*Apc[i], 0);
-      const alpha = rsoldc / dot1;
+      const dot1 = p.reduce((sum, pi, i) => sum + pi * Ap[i], 0);
+      const alpha = rsold / dot1;
 
-      for(let i=0;i<4;i++) xc[i]+=alpha*pc[i];
-      for(let i=0;i<4;i++) rc[i]-=alpha*Apc[i];
+      for (let i = 0; i < n; i++) x[i] += alpha * p[i];
+      for (let i = 0; i < n; i++) r[i] -= alpha * Ap[i];
 
-      const rsnew = rc.reduce((sum, ri) => sum + ri*ri, 0);
-      iterc++;
+      const rsnew = r.reduce((sum, ri) => sum + ri * ri, 0);
+      results.push({ iter: k + 1, x: [...x], norm: Math.sqrt(rsnew) });
 
-      resultsc.push({ iterc, xc: [...x], norm: Math.sqrt(rsnew) });
+      if (Math.sqrt(rsnew) < eps) break;
 
-      if(Math.sqrt(rsnew)<eps) break;
-
-      const beta = rsnew/rsoldc;
-      for(let i=0;i<4;i++) pc[i]=rc[i]+beta*pc[i];
-      rsoldc=rsnew;
+      const beta = rsnew / rsold;
+      for (let i = 0; i < n; i++) p[i] = r[i] + beta * p[i];
+      rsold = rsnew;
     }
 
-    setIterations(resultsc);
+    setIterations(results);
   };
 
   return (
-    <div>
+    <div
+      style={{
+        padding: "20px",
+        fontFamily: "sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <h1>Conjugate Gradient Method</h1>
-      <div style={{ marginBottom: "10px" }}>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
         <label>
-          Tolerance:
-          <input type="number" value={eps} onChange={(e)=>setEps(Number(e.target.value))} />
+          <b>Matrix Size (n×n):</b>{" "}
+          <select
+            value={n}
+            onChange={(e) => handleSizeChange(e.target.value)}
+          >
+            {[2, 3, 4, 5, 6, 7, 8].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
         </label>
-        <button onClick={calculatec}>Calculate</button>
+
+        <label>
+          <b>Tolerance:</b>{" "}
+          <input
+            type="number"
+            step="any"
+            value={eps}
+            onChange={(e) => setEps(Number(e.target.value))}
+            style={{ width: "100px" }}
+          />
+        </label>
+
+       <button onClick={calculate}>Calculate</button>
       </div>
 
-      {iterationsc.length > 0 && (
-        <>
-          <h2>Iterations:</h2>
-          <table border="1" cellPadding="5">
-            <thead>
-              <tr>
-                <th>Iteration</th>
-                <th>x1</th><th>x2</th><th>x3</th><th>x4</th>
-                <th>Residual Norm</th>
+      <div style={{ textAlign: "center" }}>
+        <h3>Matrix A:</h3>
+        <table
+          border="1"
+          cellPadding="5"
+          style={{ margin: "0 auto", borderCollapse: "collapse" }}
+        >
+          <tbody>
+            {A.map((row, i) => (
+              <tr key={i}>
+                {row.map((val, j) => (
+                  <td key={j}>
+                    <input
+                      type="number"
+                      value={val}
+                      onChange={(e) => handleAChange(i, j, e.target.value)}
+                      style={{
+                        width: "60px",
+                        textAlign: "center",
+                        border: "none",
+                      }}
+                    />
+                  </td>
+                ))}
               </tr>
-            </thead>
-            <tbody>
-              {iterationsc.map(row => (
-                <tr key={row.iterc}>
-                  <td>{row.iterc}</td>
-                  <td>{row.xc[0].toFixed(6)}</td>
-                  <td>{row.xc[1].toFixed(6)}</td>
-                  <td>{row.xc[2].toFixed(6)}</td>
-                  <td>{row.xc[3].toFixed(6)}</td>
-                  <td>{row.norm.toExponential(3)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
 
-          <h2>Convergence Graph:</h2>
+        <h3>Vector b:</h3>
+        <div>
+          {b.map((val, i) => (
+            <input
+              key={i}
+              type="number"
+              value={val}
+              onChange={(e) => handleBChange(i, e.target.value)}
+              style={{
+                width: "60px",
+                margin: "3px",
+                textAlign: "center",
+                border: "none",
+              }}
+            />
+          ))}
+        </div>
+
+        <h3>Initial x (x₀):</h3>
+        <div>
+          {x0.map((val, i) => (
+            <input
+              key={i}
+              type="number"
+              value={val}
+              onChange={(e) => handleX0Change(i, e.target.value)}
+              style={{
+                width: "60px",
+                margin: "3px",
+                textAlign: "center",
+                border: "none",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {iterations.length > 0 && (
+        <>
+          <h2 style={{ marginTop: "30px" }}>Iterations:</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table
+              border="1"
+              cellPadding="5"
+              style={{
+                margin: "0 auto",
+                borderCollapse: "collapse",
+                textAlign: "center",
+              }}
+            >
+              <thead>
+                <tr style={{ background: "#e3e3e3" }}>
+                  <th>Iteration</th>
+                  {A.map((_, j) => (
+                    <th key={j}>x{j + 1}</th>
+                  ))}
+                  <th>Residual Norm</th>
+                </tr>
+              </thead>
+              <tbody>
+                {iterations.map((row) => (
+                  <tr key={row.iter}>
+                    <td>{row.iter}</td>
+                    {row.x.map((xi, j) => (
+                      <td key={j}>{xi.toFixed(6)}</td>
+                    ))}
+                    <td>{row.norm.toExponential(3)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h2 style={{ marginTop: "30px" }}>Convergence Graph:</h2>
           <Plot
-            data={[
-              {
-                x: iterationsc.map(rc=>rc.iterc),
-                y: iterationsc.map(rc=>rc.xc[0]),
-                type:"scatter", mode:"lines+markers", name:"x1"
-              },
-              {
-                x: iterationsc.map(rc=>rc.iterc),
-                y: iterationsc.map(rc=>rc.xc[1]),
-                type:"scatter", mode:"lines+markers", name:"x2"
-              },
-              {
-                x: iterationsc.map(rc=>rc.iterc),
-                y: iterationsc.map(rc=>rc.xc[2]),
-                type:"scatter", mode:"lines+markers", name:"x3"
-              },
-              {
-                x: iterationsc.map(rc=>r.iterc),
-                y: iterationsc.map(rc=>rc.xc[3]),
-                type:"scatter", mode:"lines+markers", name:"x4"
-              }
-            ]}
+            data={A.map((_, j) => ({
+              x: iterations.map((r) => r.iter),
+              y: iterations.map((r) => r.x[j]),
+              type: "scatter",
+              mode: "lines+markers",
+              name: `x${j + 1}`,
+            }))}
             layout={{
-              title:"Conjugate Gradient Convergence",
-              xaxis:{title:"Iteration"},
-              yaxis:{title:"x values"},
-              width:800, height:500
+              title: "Conjugate Gradient Convergence",
+              xaxis: { title: "Iteration" },
+              yaxis: { title: "x values" },
+              width: 800,
+              height: 500,
             }}
           />
         </>

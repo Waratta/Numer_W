@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Plot from "react-plotly.js";
 
 function False() {
   const [funcf, setFuncF] = useState("x**4 -13");
@@ -8,6 +9,8 @@ function False() {
   const [tolf, setTolF] = useState([]);
   const [finalx1, setFinalX1] = useState(null);
   const [interationf, setIterationF] = useState(0);
+  const [plotDataF, setPlotDataF] = useState({ x: [], y: [] });
+  const [x1Points, setX1Points] = useState([]);
 
   const calculatF = () => {
     let f;
@@ -66,6 +69,7 @@ function False() {
     setTolF(resultsf);
     setFinalX1(x1);
     setIterationF(iterf);
+    setPlotDataF({ x: xVals, y: yVals });
     setX1Points(x1List);
   };
 
@@ -94,7 +98,7 @@ function False() {
           />
         </label>
         <label>
-          Tolerance:
+          Tolerance (errorF):
           <input
             type="number"
             value={errorf}
@@ -103,6 +107,41 @@ function False() {
         </label>
         <button onClick={calculatF}>Calculate</button>
       </div>
+
+      {plotDataF.x.length > 0 && (
+        <Plot
+          data={[
+            {
+              x: plotDataF.x,
+              y: plotDataF.y,
+              type: "scatter",
+              mode: "lines",
+              name: "f(x)",
+            },
+            {
+              x: x1Points,
+              y: x1Points.map(() => 0),
+              mode: "markers+lines",
+              marker: { color: "red", size: 8 },
+              line: { dash: "dot", color: "red" },
+              name: "x1 (iterations)",
+            },
+            {
+              x: [finalx1],
+              y: [0],
+              mode: "markers",
+              marker: { color: "green", size: 12, symbol: "star" },
+              name: "Final Root",
+            },
+          ]}
+          layout={{
+            title: "False Position Method - Graph of f(x)",
+            xaxis: { title: "x" },
+            yaxis: { title: "f(x)" },
+          }}
+          style={{ width: "100%", height: "500px" }}
+        />
+      )}
 
       {tolf.length > 0 && (
         <div className="tol-section">
