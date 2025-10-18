@@ -2,142 +2,127 @@ import { useState } from "react";
 import Plot from "react-plotly.js";
 
 function LinearRegression() {
-  const [xValues, setXValues] = useState("10,15,20,30,40,50,60,70,80");
-  const [yValues, setYValues] = useState("5,9,15,18,22,30,35,38,43");
-  const [Xpred, setXpred] = useState(65);
-  const [result, setResult] = useState(null);
+  const[numPoints,setNumPoints] = useState(3);
+  const [xValues, setXValues] = useState(Array(3).fill(0));
+  const [yValues, setYValues] = useState(Array(3).fill(0));
+  const [slope, setSlope] = useState(null);
+  const [intercept, setIntercept] = useState(null);
+ 
+  const handleNumPointsChange = (e) => {
+    const n = Number(e.target.value);
+    setNumPoints(n);
+    setXValues(Array(n).fill(0));
+    setYValues(Array(n).fill(0));
+  };
+  const handleXChange = (index, value) => {
+    const newX = [...xValues];
+    newX[index] = Number(value);
+    setXValues(newX);
+  };
 
-  const calculate = () => {
-    const x = xValues.split(",").map(Number);
-    const y = yValues.split(",").map(Number);
+  const handleYChange = (index, value) => {
+    const newY = [...yValues];
+    newY[index] = Number(value);
+    setYValues(newY);
+  };
 
-    if (x.length !== y.length) {
-      alert("จำนวนข้อมูลของ X และ Y ต้องเท่ากัน!");
+  const handleCalculate = () => {
+    if (xValues.length !== yValues.length || xValues.length < 2) {
+      alert("Error");
       return;
     }
 
-    const n = x.length;
-    let sumx = 0,
-      sumy = 0,
-      sumxy = 0,
-      sumx2 = 0;
+    const n = xValues.length;
+    const sumX = xValues.reduce((a, b) => a + b, 0);
+    const sumY = yValues.reduce((a, b) => a + b, 0);
+    const sumXY = xValues.reduce((a, b, i) => a + b * yValues[i], 0);
+    const sumX2 = xValues.reduce((a, b) => a + b * b, 0);
 
-    const table = [];
+    const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
 
-    for (let i = 0; i < n; i++) {
-      const xi = x[i];
-      const yi = y[i];
-      const x2 = xi * xi;
-      const xy = xi * yi;
-      table.push({ xi, yi, x2, xy });
-
-      sumx += xi;
-      sumy += yi;
-      sumxy += xy;
-      sumx2 += x2;
-    }
-
-    const a1 = (n * sumxy - sumx * sumy) / (n * sumx2 - sumx * sumx);
-    const a0 = (sumy - a1 * sumx) / n;
-    const Y = a0 + a1 * Xpred;
-
-    const yLine = x.map((xi) => a0 + a1 * xi);
-
-    setResult({
-      table,
-      sumx,
-      sumy,
-      sumx2,
-      sumxy,
-      a0,
-      a1,
-      Y,
-      x,
-      y,
-      yLine,
-    });
+    setSlope(m);
+    setIntercept(b);
   };
 
+  const generateLine = () => {
+    const minX = Math.min(...xValues);
+    const maxX = Math.max(...xValues);
+    const lineX = [minX, maxX];
+    const lineY = lineX.map((xi) => slope * xi + intercept);
+    return { lineX, lineY };
+  };
+
+  const { lineX, lineY } = slope !== null ? generateLine() : { lineX: [], lineY: [] };
+
   return (
-    <div style={{ maxWidth: 800, margin: "auto", fontFamily: "sans-serif" }}>
-      <h2>Simple Regression</h2>
+    <div style={{ textAlign: "center", marginTop: "30px" }}>
+      <h1>Linear Regression</h1>
 
-      <label>
-        ค่า X (คั่นด้วย ,):{" "}
-        <input
-          type="text"
-          value={xValues}
-          onChange={(e) => setXValues(e.target.value)}
-          style={{ width: "100%", marginBottom: 10 }}
-        />
-      </label>
-
-      <label>
-        ค่า Y (คั่นด้วย ,):{" "}
-        <input
-          type="text"
-          value={yValues}
-          onChange={(e) => setYValues(e.target.value)}
-          style={{ width: "100%", marginBottom: 10 }}
-        />
-      </label>
-
-      <label>
-       x value:{" "}
+      <div style={{ marginBottom: "15px" }}>
+        <label>N : </label>
         <input
           type="number"
-          value={Xpred}
-          onChange={(e) => setXpred(Number(e.target.value))}
-          style={{ width: "100%", marginBottom: 10 }}
+          min="2"
+          value={numPoints}
+          onChange={handleNumPointsChange}
+          style={{ width: "60px", marginLeft: "5px" }}
         />
-      </label>
+      </div>
 
-      <button onClick={calculate}>คำนวณ</button>
-
-      {result && (
-        <div style={{ marginTop: 30 }}>
-          
-          <div style={{ marginTop: 20 }}>
-            <p>
-             f(x) = {result.a0.toFixed(6)} +{" "}
-              {result.a1.toFixed(6)}x
-            </p>
-            <p>
-              f({Xpred}) = <strong>{result.Y.toFixed(6)}</strong>
-            </p>
+      <div>
+        <h4>กรองค่า X และ Y</h4>
+        {xValues.map((_, i) => (
+          <div key={i} style={{ marginBottom: "5px" }}>
+            <label>X{i + 1}: </label>
+            <input
+              type="number"
+              value={xValues[i]}
+              onChange={(e) => handleXChange(i, e.target.value)}
+              style={{ width: "80px", marginRight: "10px" }}
+            />
+            <label>Y{i + 1}: </label>
+            <input
+              type="number"
+              value={yValues[i]}
+              onChange={(e) => handleYChange(i, e.target.value)}
+              style={{ width: "80px" }}
+            />
           </div>
+        ))}
+      </div>
+
+      <button onClick = {handleCalculate} > Calculate </button>
+
+      {slope !== null && (
+        <div style={{ marginTop: "20px" }}>
+          <p>
+            f(x): <b> = {slope.toFixed(6)}x + {intercept.toFixed(6)}</b>
+          </p>
 
           <Plot
             data={[
               {
-                x: result.x,
-                y: result.y,
+                x: xValues,
+                y: yValues,
                 mode: "markers",
-                name: "ข้อมูลจริง (x,y)",
-                marker: { size: 8 },
+                name: "ข้อมูลจริง",
+                marker: { color: "blue", size: 8 },
               },
               {
-                x: result.x,
-                y: result.yLine,
+                x: lineX,
+                y: lineY,
                 mode: "lines",
-                name: "เส้น Regression",
-                line: { dash: "solid" },
-              },
-              {
-                x: [Xpred],
-                y: [result.Y],
-                mode: "markers+text",
-                name: `จุดทำนาย f(${Xpred})`,
-                marker: { color: "red", size: 10 },
-                text: [`(${Xpred}, ${result.Y.toFixed(2)})`],
-                textposition: "top center",
+                name: "เส้นประมาณค่า",
+                line: { color: "orange" },
               },
             ]}
             layout={{
-              title: "กราฟแสดงเส้นตรง Linear Regression",
+              width: 700,
+              height: 500,
+              title: "Linear Regression",
               xaxis: { title: "X" },
               yaxis: { title: "Y" },
-              height: 500,
             }}
           />
         </div>
@@ -145,4 +130,5 @@ function LinearRegression() {
     </div>
   );
 }
+
 export default LinearRegression;
