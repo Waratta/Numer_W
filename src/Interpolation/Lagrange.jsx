@@ -1,12 +1,10 @@
 
-
 function Lagrange() {
-  
 
   return (
     <>
-      <h1>Lagrange Interpolation (Linear)</h1>
-    </>
+      <h1>Lagrange Interpolation</h1>
+     </>
   )
 }
 
